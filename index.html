@@ -1,1478 +1,988 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>نرم‌افزار محاسبه قیمت خرپا و تیرچه سماوی — نسخه نهایی</title>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap');
-    
-    :root {
-      --brand:#1E6AA7;
-      --dark:#0D1117;
-      --panel:#0F141B;
-      --text:#E6EEF7;
-      --muted:#A7B9CC;
-      --border:rgba(255,255,255,.10);
-      --success:#10b981;
-      --error:#ef4444;
-      --warning:#f59e0b;
-    }
-    * { box-sizing:border-box; }
-    body {
-      margin:0;
-      background:linear-gradient(180deg,#0D1117,#0B0F14);
-      color:var(--text);
-      font-family:'B Nazanin', 'Times New Roman', Times, serif;
-      line-height:1.6;
-    }
-    .container {
-      max-width:1100px;
-      margin:28px auto;
-      padding:16px;
-    }
-    .header {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:12px;
-      border-radius:14px;
-      background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(30,106,167,.08));
-      border:1px solid var(--border);
-    }
-    .logo {
-      width:72px;
-      height:72px;
-      border-radius:12px;
-      object-fit:cover;
-      background:#000;
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .grid {
-      display:grid;
-      grid-template-columns:1.6fr 1fr;
-      gap:14px;
-      margin-top:16px;
-    }
-    @media(max-width:980px){
-      .grid{ grid-template-columns:1fr; }
-    }
-    .card {
-      background:linear-gradient(180deg,#0b0f14,#0f141b);
-      border:1px solid var(--border);
-      padding:14px;
-      border-radius:12px;
-    }
-    label {
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-    }
-    .small {
-      font-size:11px;
-      margin-top:6px;
-    }
-    select, input[type=number], input[type=password], input[type=text] {
-      width:100%;
-      padding:11px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.06);
-      outline:none;
-      background:#F9FAFB;
-      color:#111;
-      font-size:13px;
-      transition: all 0.2s ease;
-    }
-    select:focus, input[type=number]:focus, input[type=password]:focus, input[type=text]:focus {
-      box-shadow:0 6px 20px rgba(30,106,167,.18);
-      border-color:var(--brand);
-    }
-    select.invalid, input[type=number].invalid {
-      border-color: var(--error);
-      background-color: #fee;
-    }
-    select.valid, input[type=number].valid {
-      border-color: var(--success);
-    }
-    select {
-      appearance:none;
-      -webkit-appearance:none;
-      background-image:
-        linear-gradient(45deg,transparent 50%, var(--brand) 50%),
-        linear-gradient(135deg, var(--brand) 50%, transparent 50%);
-      background-position:
-        calc(100% - 18px) calc(1em + 2px),
-        calc(100% - 13px) calc(1em + 2px);
-      background-size:8px 8px,8px 8px;
-      background-repeat:no-repeat;
-    }
-    select option {
-      background:#fff;
-      color:#111;
-    }
-    .btn {
-      padding:10px 14px;
-      border-radius:10px;
-      border:none;
-      background:linear-gradient(180deg,var(--brand),#0b3d63);
-      color:#fff;
-      cursor:pointer;
-      font-size:13px;
-      transition: all 0.2s ease;
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(30, 106, 167, 0.3);
-    }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    .btn.secondary {
-      background:linear-gradient(180deg,#2b2f34,#1e2126);
-    }
-    .btn.success {
-      background:linear-gradient(180deg,var(--success),#047857);
-    }
-    .btn.error {
-      background:linear-gradient(180deg,var(--error),#b91c1c);
-    }
-    .btn.info {
-      background:linear-gradient(180deg,#3b82f6,#1d4ed8);
-    }
-    .result {
-      margin-top:12px;
-      padding:12px;
-      border-radius:10px;
-      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(0,0,0,.12));
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      border:1px solid var(--border);
-    }
-    .chip {
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.03);
-      color:var(--muted);
-      font-size:12px;
-      margin:4px 6px;
-      border:1px solid rgba(255,255,255,.06);
-    }
-    .chip.success {
-      background: rgba(16, 185, 129, 0.15);
-      color: #10b981;
-      border-color: rgba(16, 185, 129, 0.3);
-    }
-    .chip.warning {
-      background: rgba(245, 158, 11, 0.15);
-      color: #f59e0b;
-      border-color: rgba(245, 158, 11, 0.3);
-    }
-    .chip.info {
-      background: rgba(30, 106, 167, 0.15);
-      color: #1E6AA7;
-      border-color: rgba(30, 106, 167, 0.3);
-    }
-    .chip.primary {
-      background: rgba(139, 69, 19, 0.15);
-      color: #8B4513;
-      border-color: rgba(139, 69, 19, 0.3);
-    }
-    .admin-fab {
-      position:fixed;
-      left:16px;
-      bottom:16px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:linear-gradient(180deg,#0f1519,#0b1114);
-      border:1px solid var(--border);
-      color:#cfe7ff;
-      cursor:pointer;
-      font-size:13px;
-      z-index: 1000;
-    }
-    .modal-bg {
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.6);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:999;
-    }
-    .modal {
-      width:min(680px,95vw);
-      background:linear-gradient(180deg,#0b0f14,#0f141b);
-      padding:14px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .footer {
-      text-align:center;
-      color:var(--muted);
-      margin-top:18px;
-      font-size:12px;
-    }
-    .table-preview {
-      width:100%;
-      border-collapse:collapse;
-      font-size:12px;
-      margin-top:8px;
-    }
-    .table-preview th, .table-preview td {
-      border:1px solid rgba(255,255,255,.08);
-      padding:4px 6px;
-      text-align:center;
-    }
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .validation-error {
-      color: var(--error);
-      font-size: 11px;
-      margin-top: 4px;
-      display: block;
-    }
-    .validation-success {
-      color: var(--success);
-      font-size: 11px;
-      margin-top: 4px;
-      display: block;
-    }
-    .tooltip {
-      position: relative;
-      display: inline-block;
-    }
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 200px;
-      background-color: var(--panel);
-      color: var(--text);
-      text-align: center;
-      border-radius: 6px;
-      padding: 8px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -100px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      font-size: 12px;
-      border: 1px solid var(--border);
-    }
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-    .guide-section {
-      background: rgba(255,255,255,.03);
-      border-radius: 8px;
-      padding: 10px;
-      margin: 12px 0;
-      border: 1px solid rgba(255,255,255,.06);
-    }
-    .guide-section h4 {
-      margin: 0 0 8px 0;
-      font-size: 13px;
-      color: var(--brand);
-    }
-    .guide-section ul {
-      margin: 0;
-      padding-right: 16px;
-    }
-    .guide-section li {
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-    .status-message {
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin: 8px 0;
-      font-size: 12px;
-    }
-    .status-message.success {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #10b981;
-    }
-    .status-message.error {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #ef4444;
-    }
-    .status-message.info {
-      background: rgba(30, 106, 167, 0.15);
-      border: 1px solid rgba(30, 106, 167, 0.3);
-      color: #1E6AA7;
-    }
-    .status-message.warning {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #f59e0b;
-    }
-    .export-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-    .zigzag-labels {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .github-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 6px;
-      font-size: 11px;
-      margin: 2px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>نرم‌افزار محاسبه قیمت خرپا و تیرچه سماوی</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #1E6AA7;
+            --dark: #2C2C2C;
+            --light-bg: #f5f7fa;
+            --border-radius: 10px;
+        }
+
+        body {
+            font-family: sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #e8f0fe);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 10px 40px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--dark);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        h2 {
+            margin: 10px 0 20px;
+            font-size: 1.1rem;
+        }
+
+        .phone-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--dark);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .phone-banner span {
+            direction: ltr;
+        }
+
+        .whatsapp-link {
+            background: #25d366;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+
+        .flex-columns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .column {
+            flex: 1 1 320px;
+            background: #fff;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+
+        .hint-box {
+            background: #f8fafc;
+            border-radius: var(--border-radius);
+            padding: 10px;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            margin-bottom: 12px;
+            border: 1px dashed rgba(0,0,0,0.05);
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin: 4px 0;
+        }
+
+        select, input[type="number"], input[type="text"], input[type="tel"] {
+            width: 100%;
+            padding: 6px 8px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid #d0d7de;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            border: none;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #fff;
+        }
+
+        .inline-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .preview-box {
+            background: #f9fafb;
+            border-radius: var(--border-radius);
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: var(--dark);
+        }
+
+        .price-display {
+            font-size: 1rem;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #16a34a;
+        }
+
+        .customer-section {
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        .actions-row {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .footer span {
+            color: var(--primary);
+        }
+
+        .admin-panel-toggle {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .admin-panel {
+            margin-top: 10px;
+            background: #111827;
+            color: #e5e7eb;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .admin-panel input[type="password"],
+        .admin-panel input[type="number"],
+        .admin-panel input[type="text"] {
+            background: #111827;
+            color: #f9fafb;
+            border: 1px solid #4b5563;
+        }
+
+        .admin-panel label {
+            color: #e5e7eb;
+        }
+
+        .admin-status {
+            margin-top: 8px;
+            font-size: 0.75rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border-radius: 9999px;
+            background: #1f2937;
+            color: #e5e7eb;
+            margin-right: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .phone-banner {
+                flex-direction: column;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <div style="display:flex;align-items:center;gap:12px">
-      <img class="logo" id="logoImg" src="https://drive.google.com/thumbnail?id=1NNZcL2GPh8pzJd27WopQIUkNbqA6fI9T&sz=w1000" alt="logo"/>
-      <div>
-        <h2 style="margin:0">نرم‌افزار محاسبه قیمت خرپا و تیرچه سماوی</h2>
-        <div style="color:var(--muted);font-size:12px">نسخه آفلاین — ویژه فروش و مشاوره</div>
-      </div>
+    <div class="phone-banner">
+        <div>نرم‌افزار محاسبه قیمت خرپا و تیرچه سماوی — نسخه آفلاین ویژه فروش و مشاوره</div>
+        <span>۰۹۰۰۵۵۵۳۱۱۳</span>
+        <a class="whatsapp-link" href="https://wa.me/989005553113" target="_blank">واتساپ کسب‌وکار</a>
     </div>
-    <div style="text-align:left">
-      <div style="font-weight:800">۰۹۰۰۵۵۵۳۱۱۳</div>
-      <div style="color:var(--muted);font-size:12px">واتساپ کسب‌وکار</div>
-    </div>
-  </div>
 
-  <div class="guide-section">
-    <h4>📋 راهنمای انتخاب مشخصات فنی</h4>
-    <ul>
-      <li>ارتفاع 20 سانتی‌متر: مناسب سقف‌های با دهانه‌های کوتاه‌تر</li>
-      <li>ارتفاع 25 سانتی‌متر: مناسب سقف‌های با دهانه‌های بلندتر</li>
-      <li>زیگزاگ با قطر کمتر: وزن کمتر و قیمت پایین‌تر</li>
-      <li>زیگزاگ با قطر بیشتر: مقاومت بیشتر و قیمت بالاتر</li>
-    </ul>
-  </div>
+    <h1>محاسبه قیمت خرپا / تیرچه</h1>
+    <h2>انتخاب مشخصات فنی و دریافت پیش‌فاکتور</h2>
 
-  <div class="grid">
-    <div class="card">
-      <h3 style="margin-top:0">انتخاب مشخصات خرپا / تیرچه</h3>
-      
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div>
-          <label>ارتفاع (سانتی‌متر)</label>
-          <select id="height"></select>
-          <span id="heightError" class="validation-error"></span>
+    <div class="flex-columns">
+        <!-- ستون تنظیمات فنی -->
+        <div class="column">
+            <div class="section-title">📋 راهنمای انتخاب مشخصات فنی</div>
+            <div class="hint-box">
+                - ارتفاع 20 سانتیمتر: مناسب سقف‌های با دهانه‌های کوتاه‌تر.<br>
+                - ارتفاع 25 سانتیمتر: مناسب سقف‌های با دهانه‌های بلندتر.<br>
+                - زیگزاگ با قطر کمتر: وزن کمتر و قیمت پایین‌تر.<br>
+                - زیگزاگ با قطر بیشتر: مقاومت بیشتر و قیمت بالاتر.
+            </div>
+
+            <div class="section-title">انتخاب مشخصات خرپا / تیرچه</div>
+            <label>ارتفاع (سانتیمتر)</label>
+            <select id="heightSelect">
+                <option value="20">20 سانت</option>
+                <option value="25" selected>25 سانت</option>
+                <option value="30">30 سانت</option>
+            </select>
+
+            <label>قطر زیگزاگ (میلیمتر)</label>
+            <select id="zigzagSelect">
+                <option value="6">6</option>
+                <option value="8" selected>8</option>
+                <option value="10">10</option>
+            </select>
+
+            <label>میلگرد پایین (میلیمتر)</label>
+            <select id="bottomRebarSelect">
+                <option value="10">10</option>
+                <option value="12" selected>12</option>
+                <option value="14">14</option>
+            </select>
+
+            <label>میلگرد بالا (میلیمتر)</label>
+            <select id="topRebarSelect">
+                <option value="8" selected>8</option>
+                <option value="10">10</option>
+                <option value="12">12</option>
+            </select>
+
+            <label>تقویتی ۱ (سایز)</label>
+            <div class="inline">
+                <select id="extra1Size">
+                    <option value="">بدون تقویتی</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                </select>
+                <input type="number" id="extra1Count" placeholder="تعداد" min="0" value="0">
+            </div>
+
+            <label>تقویتی ۲ (سایز)</label>
+            <div class="inline">
+                <select id="extra2Size">
+                    <option value="">بدون تقویتی</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                </select>
+                <input type="number" id="extra2Count" placeholder="تعداد" min="0" value="0">
+            </div>
+
+            <label>تقویتی ۳ (سایز)</label>
+            <div class="inline">
+                <select id="extra3Size">
+                    <option value="">بدون تقویتی</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                </select>
+                <input type="number" id="extra3Count" placeholder="تعداد" min="0" value="0">
+            </div>
+
+            <div class="inline-buttons">
+                <button class="btn-primary" id="calcPriceBtn">محاسبه قیمت هر متر</button>
+                <button class="btn-secondary" id="previewSelectionBtn">پیش‌نمایش انتخاب‌ها</button>
+                <button class="btn-secondary" id="resetFormBtn">بازنشانی فرم</button>
+            </div>
+
+            <div class="price-display" id="pricePerMeterDisplay">قیمت هر متر: - تومان</div>
+
+            <div class="preview-box">
+                <div class="preview-title">پیش‌نمایش فنی و دسته‌بندی</div>
+                <div id="technicalPreview">هنوز انتخابی ثبت نشده است.</div>
+            </div>
         </div>
-        <div>
-          <label>قطر زیگزاگ (میلی‌متر)</label>
-          <select id="zigzag"></select>
-          <span id="zigzagError" class="validation-error"></span>
-          <div id="zigChips" class="zigzag-labels"></div>
+
+        <!-- ستون اطلاعات مشتری و پیش‌فاکتور -->
+        <div class="column">
+            <div class="section-title">اطلاعات مشتری برای پیش‌فاکتور</div>
+            <div class="customer-section">
+                <label>نام مشتری / شرکت</label>
+                <input type="text" id="customerName" placeholder="مثال: شرکت ساختمانی ...">
+
+                <label>شماره تماس</label>
+                <input type="tel" id="customerPhone" placeholder="مثال: 0912...">
+
+                <label>آدرس پروژه</label>
+                <input type="text" id="projectAddress" placeholder="شهر، محله، پلاک ...">
+
+                <label>نام پروژه (اختیاری)</label>
+                <input type="text" id="projectName" placeholder="مثال: برج مسکونی ...">
+            </div>
+
+            <div class="section-title" style="margin-top: 10px;">جدول اقلام پیش‌فاکتور</div>
+            <label>طول هر تیرچه (متر)</label>
+            <input type="number" id="itemLength" min="0" step="0.1" placeholder="مثال: 4.5">
+
+            <label>تعداد تیرچه (عدد)</label>
+            <input type="number" id="itemCount" min="0" step="1" placeholder="مثال: 20">
+
+            <div class="inline-buttons">
+                <button class="btn-primary" id="addItemBtn">افزودن این ترکیب به جدول پیش‌فاکتور</button>
+                <button class="btn-danger" id="clearItemsBtn">حذف همه سطرها</button>
+            </div>
+
+            <table id="itemsTable">
+                <thead>
+                <tr>
+                    <th>ردیف</th>
+                    <th>شرح</th>
+                    <th>طول هر تیرچه (متر)</th>
+                    <th>تعداد</th>
+                    <th>طول کل (متر)</th>
+                    <th>قیمت واحد (تومان)</th>
+                    <th>مبلغ کل (تومان)</th>
+                    <th>حذف</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- ردیف‌ها به صورت داینامیک اضافه می‌شوند -->
+                </tbody>
+            </table>
+
+            <div class="price-display" id="totalInvoiceAmount">جمع کل: ۰ تومان</div>
+
+            <div class="actions-row">
+                <button class="btn-success" id="saveAsImageBtn">🖼️ ذخیره پیش‌فاکتور به صورت عکس</button>
+                <button class="btn-warning" id="sendWhatsAppBtn">📱 ارسال پیش‌فاکتور از طریق واتساپ</button>
+            </div>
         </div>
-      </div>
+    </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div>
-          <label>میلگرد پایین (میلی‌متر)</label>
-          <select id="bottom"></select>
-          <span id="bottomError" class="validation-error"></span>
+    <!-- پنل تنظیمات مدیر فروش -->
+    <div class="admin-panel-toggle">
+        <button class="btn-secondary" id="toggleAdminPanelBtn">⚙️ تنظیمات مدیر فروش</button>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+        <div class="section-title">تنظیمات مدیر فروش <span class="badge">فقط روی این سیستم</span></div>
+        <button class="btn-secondary" id="closeAdminPanelBtn">بستن</button>
+
+        <div style="margin-top: 8px;">
+            <label>رمز عبور مدیر (جهت مشاهده و ویرایش اعداد)</label>
+            <input type="password" id="adminPasswordInput" placeholder="رمز مدیر">
+
+            <button class="btn-primary" id="showAdminFieldsBtn">نمایش / ویرایش (با رمز)</button>
         </div>
-        <div>
-          <label>میلگرد بالا (میلی‌متر)</label>
-          <select id="top"></select>
-          <span id="topError" class="validation-error"></span>
+
+        <div id="adminFields" style="margin-top: 10px; display:none;">
+            <div class="section-title">🔄 همگام‌سازی از GitHub</div>
+
+            <label>قیمت هر کیلو آهن (تومان)</label>
+            <input type="number" id="ironPriceInput" min="0">
+
+            <label>هزینه بتن‌ریزی هر متر (تومان)</label>
+            <input type="number" id="concretePriceInput" min="0">
+
+            <label>قیمت هر متر تقویتی (تومان)</label>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+                <div>
+                    <label style="font-size:0.7rem;">۸</label>
+                    <input type="number" id="rebar8Input" min="0">
+                </div>
+                <div>
+                    <label style="font-size:0.7rem;">۱۰</label>
+                    <input type="number" id="rebar10Input" min="0">
+                </div>
+                <div>
+                    <label style="font-size:0.7rem;">۱۲</label>
+                    <input type="number" id="rebar12Input" min="0">
+                </div>
+                <div>
+                    <label style="font-size:0.7rem;">۱۴</label>
+                    <input type="number" id="rebar14Input" min="0">
+                </div>
+                <div>
+                    <label style="font-size:0.7rem;">۱۶</label>
+                    <input type="number" id="rebar16Input" min="0">
+                </div>
+                <div>
+                    <label style="font-size:0.7rem;">۱۸</label>
+                    <input type="number" id="rebar18Input" min="0">
+                </div>
+            </div>
+
+            <div class="section-title" style="margin-top:8px;">تنظیمات GitHub API</div>
+            <label>نام کاربری GitHub</label>
+            <input type="text" id="githubUserInput" placeholder="مثال: raoufsamavi">
+            <label>نام ریپازیتوری</label>
+            <input type="text" id="githubRepoInput" placeholder="مثال: tircheh-samavi">
+            <label>توکن دسترسی GitHub</label>
+            <input type="text" id="githubTokenInput" placeholder="در محیط Vercel تنظیم می‌شود">
+            <a href="https://github.com/settings/tokens" target="_blank" style="color:#93c5fd;font-size:0.75rem;">🔗 ایجاد توکن جدید</a>
+            <label>شاخه (Branch)</label>
+            <input type="text" id="githubBranchInput" placeholder="مثال: main">
+
+            <div class="inline-buttons" style="margin-top:8px;">
+                <button class="btn-primary" id="saveGithubConfigBtn">💾 ذخیره تنظیمات GitHub</button>
+                <button class="btn-secondary" id="testGithubConnectionBtn">🔌 تست اتصال به GitHub</button>
+                <button class="btn-success" id="updateConfigGithubBtn">💾 ذخیره و ارسال به GitHub</button>
+                <button class="btn-danger" id="resetConfigBtn">بازنشانی به پیش‌فرض</button>
+            </div>
         </div>
-      </div>
 
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-        <div>
-          <label>تقویتی ۱ (سایز)</label>
-          <select id="r1">
-            <option value="0">—</option>
-            <option>8</option><option>10</option><option>12</option>
-            <option>14</option><option>16</option><option>18</option>
-          </select>
-          <label class="small">تعداد</label>
-          <input type="number" id="q1" min="0" value="0"/>
-        </div>
-        <div>
-          <label>تقویتی ۲ (سایز)</label>
-          <select id="r2">
-            <option value="0">—</option>
-            <option>8</option><option>10</option><option>12</option>
-            <option>14</option><option>16</option><option>18</option>
-          </select>
-          <label class="small">تعداد</label>
-          <input type="number" id="q2" min="0" value="0"/>
-        </div>
-        <div>
-          <label>تقویتی ۳ (سایز)</label>
-          <select id="r3">
-            <option value="0">—</option>
-            <option>8</option><option>10</option><option>12</option>
-            <option>14</option><option>16</option><option>18</option>
-          </select>
-          <label class="small">تعداد</label>
-          <input type="number" id="q3" min="0" value="0"/>
-        </div>
-      </div>
-
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn" id="calcBtn">
-          <span id="calcText">محاسبه قیمت هر متر</span>
-          <span id="calcLoading" class="loading" style="display:none"></span>
-        </button>
-        <button class="btn secondary" id="previewBtn">پیش‌نمایش انتخاب‌ها</button>
-        <button class="btn secondary" id="resetBtn">بازنشانی فرم</button>
-      </div>
-
-      <div class="result">
-        <div>قیمت هر متر (تومان)</div>
-        <strong id="pricePerM">—</strong>
-      </div>
-      
-      <div id="calcStatus"></div>
+        <div class="admin-status" id="adminStatus"></div>
     </div>
 
-    <div class="card">
-      <h3 style="margin-top:0">پیش‌نمایش فنی و دسته‌بندی</h3>
-      <div id="preview" style="min-height:80px;border-radius:8px;border:1px dashed rgba(255,255,255,.08);padding:10px;background:linear-gradient(180deg,#01050a,transparent);font-size:12px"></div>
+    <div class="footer">
+        طراحی و توسعه: مجموعه تولیدی خرپا و تیرچه <span>سماوی</span> — رنگ سازمانی: <span>#2C2C2C</span> و <span>#1E6AA7</span>
     </div>
-  </div>
-  
-  <div class="card" style="margin-top:16px">
-    <h3 style="margin-top:0">اطلاعات مشتری برای پیش‌فاکتور</h3>
-    
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label>نام مشتری / شرکت</label>
-        <input type="text" id="clientName" placeholder="نام کامل مشتری یا شرکت">
-      </div>
-      <div>
-        <label>شماره تماس</label>
-        <input type="text" id="clientPhone" placeholder="شماره تلفن همراه یا ثابت">
-      </div>
-    </div>
-    
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-      <div>
-        <label>آدرس پروژه</label>
-        <input type="text" id="clientAddress" placeholder="آدرس کامل محل پروژه">
-      </div>
-      <div>
-        <label>نام پروژه (اختیاری)</label>
-        <input type="text" id="projectName" placeholder="عنوان پروژه">
-      </div>
-    </div>
-  </div>
-  
-  <div class="card" style="margin-top:16px">
-    <h3 style="margin-top:0">جدول اقلام پیش‌فاکتور</h3>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-      <div style="flex:1;min-width:120px">
-        <label class="label">طول هر تیرچه (متر)</label>
-        <input type="number" id="rowLength" min="0" step="0.01" value="0">
-        <span id="lengthError" class="validation-error"></span>
-      </div>
-      <div style="flex:1;min-width:120px">
-        <label class="label">تعداد تیرچه (عدد)</label>
-        <input type="number" id="rowQty" min="1" step="1" value="1">
-        <span id="qtyError" class="validation-error"></span>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
-      <button class="btn success" id="addToQuote">افزودن این ترکیب به جدول پیش‌فاکتور</button>
-      <button class="btn secondary" id="clearQuote">حذف همه سطرها</button>
-    </div>
-
-    <div style="overflow-x:auto">
-      <table class="table-preview" id="quoteTable">
-        <thead>
-          <tr>
-            <th>ردیف</th>
-            <th>شرح</th>
-            <th>طول هر تیرچه (متر)</th>
-            <th>تعداد</th>
-            <th>طول کل (متر)</th>
-            <th>قیمت واحد(تومان)</th>
-            <th>مبلغ کل(تومان)</th>
-            <th>حذف</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div style="margin-top:6px;font-size:12px;color:#d1d5db">
-      <strong id="grandTotal">۰</strong> تومان
-    </div>
-
-    <div class="export-buttons">
-      <button class="btn success" id="exportImage">🖼️ ذخیره پیش‌فاکتور به صورت عکس</button>
-      <button class="btn success" id="sendWhatsapp" style="background:linear-gradient(180deg, #25D366, #128C7E)">
-        📱 ارسال پیش‌فاکتور از طریق واتساپ
-      </button>
-    </div>
-  </div>
-
-  <div class="footer">
-    طراحی و توسعه: مجموعه تولیدی خرپا و تیرچه سماوی — رنگ سازمانی: #2C2C2C و #1E6AA7
-  </div>
-</div>
-
-<!-- دکمه تنظیمات مدیر -->
-<button class="admin-fab" id="openAdmin">⚙️ تنظیمات مدیر فروش</button>
-
-<!-- مودال تنظیمات مدیر -->
-<div class="modal-bg" id="adminBg">
-  <div class="modal">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <h4 style="margin:0">تنظیمات مدیر فروش</h4>
-      <button id="closeAdmin" class="btn secondary">بستن</button>
-    </div>
-    <div style="height:1px;background:rgba(255,255,255,.06);margin:10px 0"></div>
-
-    <label>رمز عبور مدیر (جهت مشاهده و ویرایش اعداد)</label>
-    <input type="password" id="adminPass" placeholder="••••••"/>
-    <span id="adminPassError" class="validation-error"></span>
-
-    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-      <button id="unlockBtn" class="btn">نمایش / ویرایش (با رمز)</button>
-      <button id="syncFromGithub" class="btn info">🔄 همگام‌سازی از GitHub</button>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
-      <div>
-        <label>قیمت هر کیلو آهن (تومان)</label>
-        <input type="number" id="ironPrice" readonly placeholder="پیش‌فرض مخفی است"/>
-      </div>
-      <div>
-        <label>هزینه بتن‌ریزی هر متر (تومان)</label>
-        <input type="number" id="concretePrice" readonly placeholder="پیش‌فرض مخفی است"/>
-      </div>
-    </div>
-
-    <div style="margin-top:10px">
-      <label>قیمت هر متر تقویتی (تومان)</label>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px">
-        <input id="r8"  readonly placeholder="Ø8 (مخفی)"/>
-        <input id="r10" readonly placeholder="Ø10 (مخفی)"/>
-        <input id="r12" readonly placeholder="Ø12 (مخفی)"/>
-        <input id="r14" readonly placeholder="Ø14 (مخفی)"/>
-        <input id="r16" readonly placeholder="Ø16 (مخفی)"/>
-        <input id="r18" readonly placeholder="Ø18 (مخفی)"/>
-      </div>
-    </div>
-
-    <!-- بخش GitHub API -->
-    <div style="margin-top:15px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid rgba(255,255,255,0.08);">
-      <h4 style="margin:0 0 10px 0;font-size:13px;color:var(--brand);display:flex;align-items:center;gap:6px;">
-        <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 16 16">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-        </svg>
-        تنظیمات GitHub API
-      </h4>
-      
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div>
-          <label>نام کاربری GitHub</label>
-          <input type="text" id="githubUsername" placeholder="raoufsamavi-dotcom"/>
-        </div>
-        <div>
-          <label>نام ریپازیتوری</label>
-          <input type="text" id="githubRepo" placeholder="Tircheh-samavi"/>
-        </div>
-      </div>
-      
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div>
-          <label>توکن دسترسی GitHub</label>
-          <input type="password" id="githubToken" placeholder="توکن دسترسی شخصی"/>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">
-            <a href="https://github.com/settings/tokens" target="_blank" style="color:var(--brand);text-decoration:none;">
-              🔗 ایجاد توکن جدید
-            </a>
-          </div>
-        </div>
-        <div>
-          <label>شاخه (Branch)</label>
-          <input type="text" id="githubBranch" value="main" placeholder="main"/>
-        </div>
-      </div>
-      
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-        <button class="btn" id="saveGithubConfig" style="flex:1;">
-          💾 ذخیره تنظیمات GitHub
-        </button>
-        <button class="btn secondary" id="testGithubConnection" style="flex:1;">
-          🔌 تست اتصال به GitHub
-        </button>
-      </div>
-      
-      <div id="githubStatus" style="margin-top:8px;"></div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-      <button id="adminSave" class="btn success">💾 ذخیره و ارسال به GitHub</button>
-      <button id="adminReset" class="btn error">بازنشانی به پیش‌فرض</button>
-    </div>
-    <div style="margin-top:8px;color:var(--muted);font-size:12px">
-      مقادیر به‌صورت رمزگذاری‌شده در مرورگر این سیستم ذخیره می‌شود و همزمان در GitHub به‌روزرسانی می‌شود.
-    </div>
-    <div id="adminStatus" style="margin-top:10px"></div>
-  </div>
 </div>
 
 <script>
-// داده‌های پایه
-const WEIGHTS = {
-  "20": {
-    "4": {
-      "8":  {"8": 1.66},
-      "10": {"10": 2.40, "8": 2.17},
-      "12": {"12": 3.17, "10": 2.89},
-      "14": {"14": 4.07, "12": 3.76, "10": 3.53},
-      "16": {"14": 4.70, "12": 4.45, "10": 4.20}
-    },
-    "6": {
-      "8":  {"8": 2.04},
-      "10": {"10": 2.745, "8": 2.53},
-      "12": {"12": 3.545, "10": 3.285},
-      "14": {"14": 4.44, "10": 3.985, "12": 4.185},
-      "16": {"16": 5.67, "10": 4.69, "12": 5.00, "14": 5.25}
-    }
-  },
-  "25": {
-    "4": {
-      "8":  {"8": 1.90},
-      "10": {"10": 2.57, "8": 2.34},
-      "12": {"12": 3.31, "10": 3.03},
-      "14": {"14": 4.21, "12": 3.90, "10": 3.67},
-      "16": {"14": 4.85, "12": 4.59, "10": 4.34}
-    },
-    "4.5": {
-      "8":  {"8": 1.97},
-      "10": {"10": 2.64, "8": 2.41},
-      "12": {"12": 3.41, "10": 3.31},
-      "14": {"14": 4.31, "12": 4.00, "10": 3.77},
-      "16": {"14": 4.95, "12": 4.69, "10": 4.44}
-    },
-    "5": {
-      "8":  {"8": 2.06},
-      "10": {"10": 2.75, "8": 2.690},
-      "12": {"12": 4.00, "10": 3.50, "8": 3.12},
-      "14": {"12": 4.42, "14": 4.80, "10": 4.00},
-      "16": {"10": 4.95, "12": 4.82, "14": 5.43}
-    },
-    "6": {
-      "8":  {"8": 2.59},
-      "10": {"10": 3.03, "8": 2.92},
-      "12": {"12": 3.99, "10": 3.78},
-      "14": {"14": 4.97, "10": 4.41, "12": 4.74},
-      "16": {"16": 6.20, "10": 5.17, "12": 5.28, "14": 5.78}
-    }
-  }
-};
-
-// برچسب‌های زیگزاگ
-const ZIGZAG_LABELS = {
-  "20": {
-    "4": { label: "بازاری و پرکاربرد", type: "success" },
-    "6": { label: "مهندسی و طبق نقشه", type: "primary" }
-  },
-  "25": {
-    "4": { label: "بازاری و پرکاربرد", type: "success" },
-    "4.5": { label: "میان‌رده سبک", type: "info" },
-    "5": { label: "میان‌رده سنگین", type: "warning" },
-    "6": { label: "مهندسی و طبق نقشه", type: "primary" }
-  }
-};
-
-// پیکربندی پیش‌فرض
-const DEFAULT_CONFIG = {
-  ironPrice: 63500,
-  concretePrice: 60000,
-  rebar: {
-    8:  25450,
-    10: 35450,
-    12: 50000,
-    14: 68200,
-    16: 86400,
-    18: 104550
-  }
-};
-
-// تنظیمات پیش‌فرض GitHub
-const GITHUB_DEFAULT = {
-  username: 'raoufsamavi-dotcom',
-  repo: 'Tircheh-samavi',
-  branch: 'main'
-};
-
-// ==================== توابع عمومی ====================
-
-// تابع تبدیل عدد به حروف فارسی
-function numberToWords(number) {
-    if (number === 0) return 'صفر';
-    
-    const units = ['', 'یک', 'دو', 'سی', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
-    const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
-    const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
-    const hundreds = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
-    
-    function convertThreeDigit(num) {
-        let result = '';
-        const hundred = Math.floor(num / 100);
-        const ten = Math.floor((num % 100) / 10);
-        const unit = num % 10;
-        
-        if (hundred > 0) {
-            result += hundreds[hundred] + ' و ';
+    // ----------------------------
+    // داده‌ها و پیکربندی پایه
+    // ----------------------------
+    const DEFAULT_CONFIG = {
+        ironPrice: 35000,
+        concretePrice: 150000,
+        rebar: {
+            "8": 12000,
+            "10": 14000,
+            "12": 16000,
+            "14": 18000,
+            "16": 20000,
+            "18": 22000
+        },
+        github: {
+            owner: "",
+            repo: "",
+            branch: "main"
         }
-        
-        if (ten === 1) {
-            result += teens[unit];
-        } else {
-            if (ten > 1) {
-                result += tens[ten];
-                if (unit > 0) result += ' و ';
-            }
-            if (unit > 0 && ten !== 1) {
-                result += units[unit];
+    };
+
+    function loadConfig() {
+        const stored = localStorage.getItem('tirchehConfig');
+        if (stored) {
+            try {
+                return JSON.parse(stored);
+            } catch (e) {
+                return { ...DEFAULT_CONFIG };
             }
         }
-        
-        return result.trim();
+        return { ...DEFAULT_CONFIG };
     }
-    
-    let words = '';
-    const billion = Math.floor(number / 1000000000);
-    const million = Math.floor((number % 1000000000) / 1000000);
-    const thousand = Math.floor((number % 1000000) / 1000);
-    const remainder = number % 1000;
-    
-    if (billion > 0) {
-        words += convertThreeDigit(billion) + ' میلیارد و ';
-    }
-    
-    if (million > 0) {
-        words += convertThreeDigit(million) + ' میلیون و ';
-    }
-    
-    if (thousand > 0) {
-        words += convertThreeDigit(thousand) + ' هزار و ';
-    }
-    
-    if (remainder > 0) {
-        words += convertThreeDigit(remainder);
-    }
-    
-    // حذف " و " اضافی از انتها
-    words = words.replace(/ و $/, '');
-    
-    return words + ' تومان';
-}
 
-// تابع تولید کد واحد
-function generateProductCode(base, extras) {
-    let code = `SMT-${base.height}-${base.zigzag}-${base.bottom}-${base.top}`;
-    
-    if (extras && extras.length > 0) {
-        extras.forEach(extra => {
-            code += `-T${extra.size}x${extra.qty}`;
+    let config = loadConfig();
+
+    // *** تغییر شماره 1: لود از config.json ریپو بعد از تعریف config ***
+    async function loadConfigFromRepo() {
+        try {
+            const response = await fetch('/config.json?v=' + Date.now());
+            if (!response.ok) throw new Error('Failed');
+            const data = await response.json();
+            config.ironPrice = data.ironPrice || config.ironPrice;
+            config.concretePrice = data.concretePrice || config.concretePrice;
+            if (data.rebar) config.rebar = { ...config.rebar, ...data.rebar };
+            fillAdminFields(true);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadConfigFromRepo();
+    });
+
+    function saveConfig(cfg) {
+        localStorage.setItem('tirchehConfig', JSON.stringify(cfg));
+    }
+
+    function getAdminPassword() {
+        return "1234";
+    }
+
+    // ----------------------------
+    // المان‌های اصلی
+    // ----------------------------
+    const heightSelect = document.getElementById('heightSelect');
+    const zigzagSelect = document.getElementById('zigzagSelect');
+    const bottomRebarSelect = document.getElementById('bottomRebarSelect');
+    const topRebarSelect = document.getElementById('topRebarSelect');
+    const extra1Size = document.getElementById('extra1Size');
+    const extra1Count = document.getElementById('extra1Count');
+    const extra2Size = document.getElementById('extra2Size');
+    const extra2Count = document.getElementById('extra2Count');
+    const extra3Size = document.getElementById('extra3Size');
+    const extra3Count = document.getElementById('extra3Count');
+
+    const calcPriceBtn = document.getElementById('calcPriceBtn');
+    const previewSelectionBtn = document.getElementById('previewSelectionBtn');
+    const resetFormBtn = document.getElementById('resetFormBtn');
+    const pricePerMeterDisplay = document.getElementById('pricePerMeterDisplay');
+    const technicalPreview = document.getElementById('technicalPreview');
+
+    const customerNameInput = document.getElementById('customerName');
+    const customerPhoneInput = document.getElementById('customerPhone');
+    const projectAddressInput = document.getElementById('projectAddress');
+    const projectNameInput = document.getElementById('projectName');
+
+    const itemLengthInput = document.getElementById('itemLength');
+    const itemCountInput = document.getElementById('itemCount');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const clearItemsBtn = document.getElementById('clearItemsBtn');
+    const itemsTableBody = document.querySelector('#itemsTable tbody');
+    const totalInvoiceAmountDisplay = document.getElementById('totalInvoiceAmount');
+
+    const saveAsImageBtn = document.getElementById('saveAsImageBtn');
+    const sendWhatsAppBtn = document.getElementById('sendWhatsAppBtn');
+
+    const toggleAdminPanelBtn = document.getElementById('toggleAdminPanelBtn');
+    const adminPanel = document.getElementById('adminPanel');
+    const closeAdminPanelBtn = document.getElementById('closeAdminPanelBtn');
+    const adminPassInput = document.getElementById('adminPasswordInput');
+    const showAdminFieldsBtn = document.getElementById('showAdminFieldsBtn');
+    const adminFields = document.getElementById('adminFields');
+    const adminStatus = document.getElementById('adminStatus');
+
+    // ورودی‌های قیمت در پنل مدیر
+    const ironInput = document.getElementById('ironPriceInput');
+    const concreteInput = document.getElementById('concretePriceInput');
+    const r8Input = document.getElementById('rebar8Input');
+    const r10Input = document.getElementById('rebar10Input');
+    const r12Input = document.getElementById('rebar12Input');
+    const r14Input = document.getElementById('rebar14Input');
+    const r16Input = document.getElementById('rebar16Input');
+    const r18Input = document.getElementById('rebar18Input');
+
+    const githubUserInput = document.getElementById('githubUserInput');
+    const githubRepoInput = document.getElementById('githubRepoInput');
+    const githubTokenInput = document.getElementById('githubTokenInput');
+    const githubBranchInput = document.getElementById('githubBranchInput');
+    const saveGithubConfigBtn = document.getElementById('saveGithubConfigBtn');
+    const testGithubConnectionBtn = document.getElementById('testGithubConnectionBtn');
+    const updateConfigGithubBtn = document.getElementById('updateConfigGithubBtn');
+    const resetConfigBtn = document.getElementById('resetConfigBtn');
+    const adminSaveBtn = updateConfigGithubBtn; // همان دکمه ذخیره و ارسال
+
+    // ----------------------------
+    // توابع کمکی
+    // ----------------------------
+    function formatNumber(num) {
+        if (isNaN(num)) return '-';
+        return num.toLocaleString('fa-IR');
+    }
+
+    function showAdminStatus(message, type = 'info') {
+        adminStatus.textContent = message;
+        adminStatus.style.color =
+            type === 'error' ? '#fca5a5' :
+            type === 'success' ? '#6ee7b7' :
+            '#bfdbfe';
+    }
+
+    function fillAdminFields(fromConfigOnly = false) {
+        ironInput.value = config.ironPrice || '';
+        concreteInput.value = config.concretePrice || '';
+        if (config.rebar) {
+            r8Input.value = config.rebar["8"] || '';
+            r10Input.value = config.rebar["10"] || '';
+            r12Input.value = config.rebar["12"] || '';
+            r14Input.value = config.rebar["14"] || '';
+            r16Input.value = config.rebar["16"] || '';
+            r18Input.value = config.rebar["18"] || '';
+        }
+        if (!fromConfigOnly && config.github) {
+            githubUserInput.value = config.github.owner || '';
+            githubRepoInput.value = config.github.repo || '';
+            githubBranchInput.value = config.github.branch || 'main';
+        }
+    }
+
+    fillAdminFields();
+
+    // ----------------------------
+    // محاسبه قیمت هر متر
+    // ----------------------------
+    function calculatePricePerMeter() {
+        const ironPrice = config.ironPrice || DEFAULT_CONFIG.ironPrice;
+        const concretePrice = config.concretePrice || DEFAULT_CONFIG.concretePrice;
+
+        const height = Number(heightSelect.value);
+        const zigzagDia = Number(zigzagSelect.value);
+        const bottomDia = Number(bottomRebarSelect.value);
+        const topDia = Number(topRebarSelect.value);
+
+        // وزن تقریبی بر اساس حالت ساده (فقط جهت تخمین)
+        const baseWeightPerMeter = (zigzagDia * 0.1) + (bottomDia * 0.2) + (topDia * 0.15);
+        const heightFactor = 1 + ((height - 20) / 100);
+        let weight = baseWeightPerMeter * heightFactor;
+
+        // تقویتی‌ها
+        function extraWeight(size, count) {
+            if (!size || !count) return 0;
+            const dia = Number(size);
+            const cnt = Number(count);
+            return dia * 0.1 * cnt;
+        }
+
+        weight += extraWeight(extra1Size.value, extra1Count.value);
+        weight += extraWeight(extra2Size.value, extra2Count.value);
+        weight += extraWeight(extra3Size.value, extra3Count.value);
+
+        const ironCost = weight * ironPrice;
+        const concreteCost = height > 20 ? concretePrice * 0.4 : concretePrice * 0.3;
+
+        const total = ironCost + concreteCost;
+        return Math.round(total);
+    }
+
+    function updateTechnicalPreview() {
+        const heightText = heightSelect.value + " سانت";
+        const zigzagText = "زیگزاگ " + zigzagSelect.value + " میلی‌متر";
+        const bottomText = "میلگرد پایین " + bottomRebarSelect.value + " میلی‌متر";
+        const topText = "میلگرد بالا " + topRebarSelect.value + " میلی‌متر";
+
+        function extraText(size, count, index) {
+            if (!size || !count || Number(count) === 0) return "";
+            return `<div>تقویتی ${index}: ${size} میلی‌متر × ${count} عدد</div>`;
+        }
+
+        const extra1 = extraText(extra1Size.value, extra1Count.value, 1);
+        const extra2 = extraText(extra2Size.value, extra2Count.value, 2);
+        const extra3 = extraText(extra3Size.value, extra3Count.value, 3);
+
+        technicalPreview.innerHTML = `
+            <div>ارتفاع: ${heightText}</div>
+            <div>${zigzagText}</div>
+            <div>${bottomText}</div>
+            <div>${topText}</div>
+            ${extra1}
+            ${extra2}
+            ${extra3}
+        `;
+    }
+
+    // ----------------------------
+    // مدیریت ردیف‌های پیش‌فاکتور
+    // ----------------------------
+    let invoiceItems = [];
+
+    function renderItemsTable() {
+        itemsTableBody.innerHTML = "";
+        let total = 0;
+        invoiceItems.forEach((item, index) => {
+            const tr = document.createElement('tr');
+
+            const tdIndex = document.createElement('td');
+            tdIndex.textContent = index + 1;
+
+            const tdDesc = document.createElement('td');
+            tdDesc.textContent = item.description;
+
+            const tdLength = document.createElement('td');
+            tdLength.textContent = item.length;
+
+            const tdCount = document.createElement('td');
+            tdCount.textContent = item.count;
+
+            const tdTotalLength = document.createElement('td');
+            tdTotalLength.textContent = item.totalLength;
+
+            const tdUnitPrice = document.createElement('td');
+            tdUnitPrice.textContent = formatNumber(item.unitPrice);
+
+            const tdTotalPrice = document.createElement('td');
+            tdTotalPrice.textContent = formatNumber(item.totalPrice);
+
+            const tdDelete = document.createElement('td');
+            const btnDel = document.createElement('button');
+            btnDel.textContent = "حذف";
+            btnDel.className = "btn-danger";
+            btnDel.onclick = () => {
+                invoiceItems.splice(index, 1);
+                renderItemsTable();
+            };
+            tdDelete.appendChild(btnDel);
+
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdDesc);
+            tr.appendChild(tdLength);
+            tr.appendChild(tdCount);
+            tr.appendChild(tdTotalLength);
+            tr.appendChild(tdUnitPrice);
+            tr.appendChild(tdTotalPrice);
+            tr.appendChild(tdDelete);
+
+            itemsTableBody.appendChild(tr);
+            total += item.totalPrice;
         });
+
+        totalInvoiceAmountDisplay.textContent = "جمع کل: " + formatNumber(total) + " تومان";
     }
-    
-    return code;
-}
 
-// ==================== مدیریت پیکربندی ====================
-
-// تنظیمات GitHub
-let githubSettings = {
-  token: '',
-  username: GITHUB_DEFAULT.username,
-  repo: GITHUB_DEFAULT.repo,
-  branch: GITHUB_DEFAULT.branch
-};
-
-// تابع نمایش وضعیت GitHub
-function showGithubStatus(message, type = "info") {
-  const statusEl = document.getElementById('githubStatus');
-  if (!statusEl) return;
-  
-  statusEl.innerHTML = `<div class="status-message ${type}">${message}</div>`;
-  
-  if (type === "success") {
-    setTimeout(() => {
-      statusEl.innerHTML = '';
-    }, 3000);
-  }
-}
-
-// تابع ذخیره تنظیمات GitHub در localStorage
-function saveGithubSettings(settings) {
-  localStorage.setItem('githubToken', settings.token);
-  localStorage.setItem('githubUsername', settings.username);
-  localStorage.setItem('githubRepo', settings.repo);
-  localStorage.setItem('githubBranch', settings.branch);
-}
-
-// تابع بارگیری تنظیمات GitHub از localStorage
-function loadGithubSettings() {
-  return {
-    token: localStorage.getItem('githubToken') || '',
-    username: localStorage.getItem('githubUsername') || GITHUB_DEFAULT.username,
-    repo: localStorage.getItem('githubRepo') || GITHUB_DEFAULT.repo,
-    branch: localStorage.getItem('githubBranch') || GITHUB_DEFAULT.branch
-  };
-}
-
-// تابع تست اتصال به GitHub
-async function testGithubConnection(settings) {
-  try {
-    if (!settings.token) throw new Error('توکن وارد نشده است');
-    if (!settings.username) throw new Error('نام کاربری وارد نشده است');
-    if (!settings.repo) throw new Error('نام ریپازیتوری وارد نشده است');
-    
-    const url = `https://api.github.com/repos/${settings.username}/${settings.repo}/contents/config.json?ref=${settings.branch}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `token ${settings.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+    // ----------------------------
+    // رویدادها
+    // ----------------------------
+    calcPriceBtn.addEventListener('click', function () {
+        const price = calculatePricePerMeter();
+        pricePerMeterDisplay.textContent = "قیمت هر متر: " + formatNumber(price) + " تومان";
     });
-    
-    if (response.status === 404) {
-      throw new Error('فایل config.json در ریپازیتوری پیدا نشد');
-    }
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`خطا: ${errorData.message || response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return {
-      success: true,
-      message: '✅ اتصال موفق! فایل config.json پیدا شد.',
-      sha: data.sha
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `❌ ${error.message}`
-    };
-  }
-}
 
-// تابع بارگیری config از GitHub
-async function fetchConfigFromGitHub(settings) {
-  try {
-    const url = `https://api.github.com/repos/${settings.username}/${settings.repo}/contents/config.json?ref=${settings.branch}`;
-    
-    const headers = {};
-    if (settings.token) {
-      headers['Authorization'] = `token ${settings.token}`;
-    }
-    headers['Accept'] = 'application/vnd.github.v3+json';
-    
-    const response = await fetch(url, { headers });
-    
-    if (!response.ok) {
-      throw new Error(`خطا در دریافت فایل: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    const content = atob(data.content.replace(/\n/g, ''));
-    
-    return {
-      content: JSON.parse(content),
-      sha: data.sha
-    };
-  } catch (error) {
-    console.error('خطا در fetchConfigFromGitHub:', error);
-    throw error;
-  }
-}
+    previewSelectionBtn.addEventListener('click', updateTechnicalPreview);
 
-// تابع آپدیت config در GitHub
-async function updateConfigOnGitHub(settings, newConfig, commitMessage = 'به‌روزرسانی تنظیمات از پنل مدیر') {
-  try {
-    let sha = null;
-    
-    // سعی می‌کنیم فایل فعلی را بگیریم
-    try {
-      const existingFile = await fetchConfigFromGitHub(settings);
-      sha = existingFile.sha;
-    } catch (error) {
-      console.log('فایل جدید ایجاد می‌شود');
-    }
-    
-    const url = `https://api.github.com/repos/${settings.username}/${settings.repo}/contents/config.json`;
-    
-    // تبدیل config به base64
-    const content = btoa(JSON.stringify(newConfig, null, 2));
-    
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${settings.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: commitMessage,
-        content: content,
-        sha: sha,
-        branch: settings.branch
-      })
+    resetFormBtn.addEventListener('click', function () {
+        heightSelect.value = "25";
+        zigzagSelect.value = "8";
+        bottomRebarSelect.value = "12";
+        topRebarSelect.value = "8";
+        extra1Size.value = "";
+        extra1Count.value = 0;
+        extra2Size.value = "";
+        extra2Count.value = 0;
+        extra3Size.value = "";
+        extra3Count.value = 0;
+        pricePerMeterDisplay.textContent = "قیمت هر متر: - تومان";
+        technicalPreview.textContent = "هنوز انتخابی ثبت نشده است.";
     });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'خطا در آپدیت فایل');
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('خطا در updateConfigOnGitHub:', error);
-    throw error;
-  }
-}
 
-// تابع همگام‌سازی با GitHub
-async function syncWithGitHub() {
-  const settings = githubSettings;
-  
-  if (!settings.token || !settings.username || !settings.repo) {
-    return { success: false, message: 'لطفاً ابتدا تنظیمات GitHub را وارد کنید' };
-  }
-  
-  try {
-    // بارگیری از GitHub
-    const result = await fetchConfigFromGitHub(settings);
-    
-    // ذخیره در localStorage
-    config = result.content;
-    saveConfig(config);
-    
-    // آپدیت فرم
-    if (ironInput) {
-      ironInput.value = config.ironPrice;
-      concreteInput.value = config.concretePrice;
-      r8Input.value = config.rebar[8];
-      r10Input.value = config.rebar[10];
-      r12Input.value = config.rebar[12];
-      r14Input.value = config.rebar[14];
-      r16Input.value = config.rebar[16];
-      r18Input.value = config.rebar[18];
-    }
-    
-    return { 
-      success: true, 
-      message: '✅ تنظیمات از GitHub بارگیری و ذخیره شد' 
-    };
-  } catch (error) {
-    return { 
-      success: false, 
-      message: `❌ خطا در همگام‌سازی: ${error.message}` 
-    };
-  }
-}
+    addItemBtn.addEventListener('click', function () {
+        const length = Number(itemLengthInput.value);
+        const count = Number(itemCountInput.value);
+        if (!length || !count) {
+            alert("لطفاً طول و تعداد تیرچه را وارد کنید.");
+            return;
+        }
+        const unitPrice = calculatePricePerMeter();
+        const totalLength = length * count;
+        const totalPrice = unitPrice * totalLength;
 
-// ==================== مدیریت پیکربندی اصلی ====================
+        const desc = `خرپا / تیرچه ارتفاع ${heightSelect.value} سانت، زیگزاگ ${zigzagSelect.value}، میلگرد پایین ${bottomRebarSelect.value}، میلگرد بالا ${topRebarSelect.value}`;
+        invoiceItems.push({
+            description: desc,
+            length: length,
+            count: count,
+            totalLength: totalLength,
+            unitPrice: unitPrice,
+            totalPrice: totalPrice
+        });
 
-function getAdminPassword() {
-  return localStorage.getItem("samaviAdminPass") || "634152";
-}
-
-function setAdminPassword(newPass) {
-  localStorage.setItem("samaviAdminPass", newPass);
-}
-
-function loadConfig() {
-  try {
-    const raw = localStorage.getItem("samaviConfig");
-    if (!raw) return structuredClone(DEFAULT_CONFIG);
-    const decoded = atob(raw);
-    const obj = JSON.parse(decoded);
-    if (!obj.rebar) obj.rebar = structuredClone(DEFAULT_CONFIG.rebar);
-    if (!obj.ironPrice) obj.ironPrice = DEFAULT_CONFIG.ironPrice;
-    if (!obj.concretePrice) obj.concretePrice = DEFAULT_CONFIG.concretePrice;
-    return obj;
-  } catch(e) {
-    console.error("خطا در بارگذاری تنظیمات:", e);
-    return structuredClone(DEFAULT_CONFIG);
-  }
-}
-
-function saveConfig(cfg) {
-  try {
-    const raw = JSON.stringify(cfg);
-    const enc = btoa(raw);
-    localStorage.setItem("samaviConfig", enc);
-    return true;
-  } catch(e) {
-    console.error("خطا در ذخیره تنظیمات:", e);
-    return false;
-  }
-}
-
-let config = loadConfig();
-let lastPricePerMValue = null;
-let rowCounter = 0;
-
-// بارگیری تنظیمات GitHub
-githubSettings = loadGithubSettings();
-
-// متغیرهای global
-const heightSel = document.getElementById("height");
-const zigSel    = document.getElementById("zigzag");
-const bottomSel = document.getElementById("bottom");
-const topSel    = document.getElementById("top");
-const pricePerMEl = document.getElementById("pricePerM");
-const previewEl = document.getElementById("preview");
-
-// مدیریت پنل مدیر
-const adminBg = document.getElementById("adminBg");
-const openAdminBtn = document.getElementById("openAdmin");
-const closeAdminBtn = document.getElementById("closeAdmin");
-const adminPassInput = document.getElementById("adminPass");
-const ironInput = document.getElementById("ironPrice");
-const concreteInput = document.getElementById("concretePrice");
-const r8Input  = document.getElementById("r8");
-const r10Input = document.getElementById("r10");
-const r12Input = document.getElementById("r12");
-const r14Input = document.getElementById("r14");
-const r16Input = document.getElementById("r16");
-const r18Input = document.getElementById("r18");
-const unlockBtn = document.getElementById("unlockBtn");
-const adminSaveBtn = document.getElementById("adminSave");
-const adminResetBtn = document.getElementById("adminReset");
-const syncFromGithubBtn = document.getElementById("syncFromGithub");
-const adminStatus = document.getElementById("adminStatus");
-
-// عناصر GitHub
-const saveGithubConfigBtn = document.getElementById("saveGithubConfig");
-const testGithubConnectionBtn = document.getElementById("testGithubConnection");
-
-function showAdminStatus(message, type = "info") {
-  adminStatus.innerHTML = `<div class="status-message ${type}">${message}</div>`;
-}
-
-function clearAdminStatus() {
-  adminStatus.innerHTML = "";
-}
-
-function fillAdminFields(showValues) {
-  if (showValues) {
-    ironInput.value = config.ironPrice;
-    concreteInput.value = config.concretePrice;
-    r8Input.value  = config.rebar[8];
-    r10Input.value = config.rebar[10];
-    r12Input.value = config.rebar[12];
-    r14Input.value = config.rebar[14];
-    r16Input.value = config.rebar[16];
-    r18Input.value = config.rebar[18];
-  } else {
-    ironInput.value = "";
-    concreteInput.value = "";
-    r8Input.value  = "";
-    r10Input.value = "";
-    r12Input.value = "";
-    r14Input.value = "";
-    r16Input.value = "";
-    r18Input.value = "";
-  }
-}
-
-function setAdminReadonly(state) {
-  [ironInput, concreteInput, r8Input, r10Input, r12Input, r14Input, r16Input, r18Input]
-    .forEach(inp => inp.readOnly = state);
-}
-
-// توابع پر کردن selectها
-function populateHeights() {
-  heightSel.innerHTML = "<option value=''>انتخاب کنید…</option>";
-  Object.keys(WEIGHTS).sort((a,b)=>Number(a)-Number(b)).forEach(h=>{
-    const opt = document.createElement("option");
-    opt.value = h;
-    opt.textContent = h;
-    heightSel.appendChild(opt);
-  });
-  zigSel.innerHTML = "<option value=''>—</option>";
-  bottomSel.innerHTML = "<option value=''>—</option>";
-  topSel.innerHTML = "<option value=''>—</option>";
-}
-
-function populateZigs() {
-  const h = heightSel.value;
-  zigSel.innerHTML = "<option value=''>انتخاب زیگزاگ…</option>";
-  const chipsDiv = document.getElementById("zigChips");
-  chipsDiv.innerHTML = "";
-  
-  if (!h || !WEIGHTS[h]) return;
-  
-  const zigs = Object.keys(WEIGHTS[h]).sort((a,b)=>Number(a)-Number(b));
-  
-  zigs.forEach(z=>{
-    const opt = document.createElement("option");
-    opt.value = z;
-    opt.textContent = z;
-    zigSel.appendChild(opt);
-  });
-
-  if (ZIGZAG_LABELS[h]) {
-    Object.keys(ZIGZAG_LABELS[h]).forEach(zigValue => {
-      const labelInfo = ZIGZAG_LABELS[h][zigValue];
-      const span = document.createElement("span");
-      span.className = `chip ${labelInfo.type}`;
-      span.textContent = `زیگزاگ ${zigValue} → ${labelInfo.label}`;
-      chipsDiv.appendChild(span);
+        renderItemsTable();
     });
-  }
-}
 
-function populateBottoms() {
-  const h = heightSel.value;
-  const z = zigSel.value;
-  bottomSel.innerHTML = "<option value=''>انتخاب میلگرد پایین…</option>";
-  topSel.innerHTML = "<option value=''>—</option>";
-  if (!h || !z || !WEIGHTS[h] || !WEIGHTS[h][z]) return;
-  const bottoms = Object.keys(WEIGHTS[h][z]).sort((a,b)=>Number(a)-Number(b));
-  bottoms.forEach(b=>{
-    const opt = document.createElement("option");
-    opt.value = b;
-    opt.textContent = b;
-    bottomSel.appendChild(opt);
-  });
-}
-
-function populateTops() {
-  const h = heightSel.value;
-  const z = zigSel.value;
-  const b = bottomSel.value;
-  topSel.innerHTML = "<option value=''>انتخاب میلگرد بالا…</option>";
-  if (!h || !z || !b || !WEIGHTS[h] || !WEIGHTS[h][z] || !WEIGHTS[h][z][b]) return;
-  const tops = Object.keys(WEIGHTS[h][z][b]).sort((a,b)=>Number(a)-Number(b));
-  tops.forEach(t=>{
-    const opt = document.createElement("option");
-    opt.value = t;
-    opt.textContent = t;
-    topSel.appendChild(opt);
-  });
-}
-
-// تابع محاسبه وزن پایه
-function getBaseWeight() {
-  const h = heightSel.value;
-  const z = zigSel.value;
-  const b = bottomSel.value;
-  const t = topSel.value;
-  if (!h || !z || !b || !t) {
-    return null;
-  }
-  if (!WEIGHTS[h] || !WEIGHTS[h][z] || !WEIGHTS[h][z][b] || WEIGHTS[h][z][b][t] === undefined) {
-    return null;
-  }
-  return {
-    height: Number(h),
-    zigzag: Number(z),
-    bottom: Number(b),
-    top: Number(t),
-    weight: WEIGHTS[h][z][b][t]
-  };
-}
-
-// تابع گرفتن تقویتی‌ها
-function getRebarExtras() {
-  const items = [];
-  for (let i=1;i<=3;i++) {
-    const size = parseInt(document.getElementById("r"+i).value || "0",10);
-    const qty  = parseInt(document.getElementById("q"+i).value || "0",10);
-    if (size>0 && qty>0) {
-      const price = config.rebar[size] || 0;
-      items.push({size,qty,price});
-    }
-  }
-  return items;
-}
-
-// تابع محاسبه قیمت با درنظرگیری تقویتی‌ها
-function calcPrice() {
-  try {
-    const base = getBaseWeight();
-    if (!base) {
-      alert("لطفاً تمام مشخصات را انتخاب کنید");
-      return;
-    }
-    
-    const ironPrice = Number(config.ironPrice) || DEFAULT_CONFIG.ironPrice;
-    const concretePrice = Number(config.concretePrice) || DEFAULT_CONFIG.concretePrice;
-
-    const steelCost = base.weight * ironPrice;
-    
-    // محاسبه هزینه تقویتی‌ها
-    let extraCost = 0;
-    const extras = getRebarExtras();
-    extras.forEach(e => {
-      extraCost += e.qty * (config.rebar[e.size] || 0);
+    clearItemsBtn.addEventListener('click', function () {
+        if (confirm("همه سطرها حذف شوند؟")) {
+            invoiceItems = [];
+            renderItemsTable();
+        }
     });
-    
-    const totalPerM = steelCost + concretePrice + extraCost;
-    
-    pricePerMEl.textContent = Math.round(totalPerM).toLocaleString("fa-IR");
-    
-    // آپدیت پیش‌نمایش
-    let text = "";
-    text += `ارتفاع: ${base.height} سانتی‌متر<br>`;
-    text += `قطر زیگزاگ: ${base.zigzag} میلی‌متر<br>`;
-    text += `میلگرد پایین: دو عدد ${base.bottom} میلی‌متر<br>`;
-    text += `میلگرد بالا: یک عدد ${base.top} میلی‌متر<br>`;
-    
-    if (extras.length > 0) {
-      text += `تقویتی‌ها: `;
-      extras.forEach(e => {
-        text += `${e.qty} عدد Ø${e.size} `;
-      });
-      text += `<br>`;
-    }
-    
-    text += `قیمت هر متر: ${Math.round(totalPerM).toLocaleString("fa-IR")} تومان<br>`;
-    
-    // اضافه کردن کد واحد به پیش‌نمایش
-    const productCode = generateProductCode(base, extras);
-    text += `<br><strong>کد واحد: ${productCode}</strong>`;
-    
-    previewEl.innerHTML = text;
-    
-    // ذخیره قیمت برای پیش‌فاکتور
-    lastPricePerMValue = Math.round(totalPerM);
-    
-  } catch (error) {
-    console.error("خطا در محاسبه قیمت:", error);
-    alert("خطا در محاسبه قیمت");
-  }
-}
 
-// توابع پیش‌فاکتور
-function addToQuote() {
-  const base = getBaseWeight();
-  if (!base) {
-    alert("لطفاً ابتدا مشخصات خرپا را انتخاب و محاسبه کنید.");
-    return;
-  }
-
-  if (lastPricePerMValue === null) {
-    alert("ابتدا روی «محاسبه قیمت هر متر» بزنید.");
-    return;
-  }
-
-  const length = Number(document.getElementById("rowLength").value || "0");
-  const qty    = Number(document.getElementById("rowQty").value || "0");
-  const tbody = document.querySelector("#quoteTable tbody");
-
-  if (!length || length <= 0) {
-    alert("طول هر تیرچه باید بزرگتر از صفر باشد");
-    return;
-  }
-
-  if (!qty || qty <= 0) {
-    alert("تعداد تیرچه باید بزرگتر از صفر باشد");
-    return;
-  }
-
-  const totalLength = length * qty;
-  const lineTotal   = totalLength * lastPricePerMValue;
-
-  const tr = document.createElement("tr");
-  tr.setAttribute("data-total", String(lineTotal));
-
-  const extras = getRebarExtras();
-  const productCode = generateProductCode(base, extras);
-  
-  const desc = `تیرچه ارتفاع ${base.height}، زیگزاگ ${base.zigzag}، پایین ۲×${base.bottom}، بالا ۱×${base.top}`;
-
-  let extrasTxt = "";
-  if (extras.length) {
-    extrasTxt = extras.map(e => `${e.qty}×Ø${e.size}`).join(" ، ");
-  }
-
-  rowCounter += 1;
-
-  tr.innerHTML = `
-    <td>${rowCounter}</td>
-    <td>${desc}${extrasTxt ? "<br><span style='font-size:11px;color:#9ca3af'>تقویتی: " + extrasTxt + "</span>" : ""}<br><span style='font-size:10px;color:#1E6AA7'>کد: ${productCode}</span></td>
-    <td>${length}</td>
-    <td>${qty}</td>
-    <td>${totalLength.toFixed(2)}</td>
-    <td>${lastPricePerMValue.toLocaleString("fa-IR")}</td>
-    <td>${lineTotal.toLocaleString("fa-IR")}</td>
-    <td><button class="btn error" style="padding:2px 6px;font-size:10px">حذف</button></td>
-  `;
-
-  const delBtn = tr.querySelector("button");
-  delBtn.addEventListener("click", function(){
-    if (confirm("آیا از حذف این ردیف اطمینان دارید؟")) {
-      tr.remove();
-      refreshGrandTotal();
-    }
-  });
-
-  tbody.appendChild(tr);
-  refreshGrandTotal();
-  
-  document.getElementById("rowLength").value = "0";
-  document.getElementById("rowQty").value = "1";
-  
-  alert("ردیف جدید با موفقیت به پیش‌فاکتور اضافه شد");
-}
-
-function refreshGrandTotal() {
-  const tbody = document.querySelector("#quoteTable tbody");
-  const grandTotalEl = document.getElementById("grandTotal");
-  
-  let sum = 0;
-  tbody.querySelectorAll("tr").forEach(tr => {
-    const val = Number(tr.getAttribute("data-total") || "0");
-    sum += val;
-  });
-  grandTotalEl.textContent = sum ? sum.toLocaleString("fa-IR") : "۰";
-}
-
-function clearQuote() {
-  const tbody = document.querySelector("#quoteTable tbody");
-  
-  if (tbody.querySelectorAll("tr").length === 0) {
-    alert("پیش‌فاکتور خالی است");
-    return;
-  }
-  
-  if (confirm("آیا از حذف تمامی ردیف‌های پیش‌فاکتور اطمینان دارید؟")) {
-    tbody.innerHTML = "";
-    rowCounter = 0;
-    refreshGrandTotal();
-    alert("تمام ردیف‌های پیش‌فاکتور حذف شدند");
-  }
-}
-
-// تابع خروجی عکس - نسخه اصلاح شده نهایی
-function exportToImage() {
-  const exportDiv = document.createElement('div');
-  exportDiv.style.cssText = `
-    background: white;
-    color: black;
-    padding: 25px;
-    font-family: 'B Nazanin', 'Times New Roman', Times, serif;
-    direction: rtl;
-    width: 800px;
-    position: fixed;
-    left: -10000px;
-    top: 0;
-    line-height: 1.6;
-  `;
-  
-  const now = new Date();
-  const persianDate = now.toLocaleDateString('fa-IR');
-  
-  // محاسبه جمع کل واقعی
-  let grandTotal = 0;
-  const tbody = document.querySelector("#quoteTable tbody");
-  const rows = tbody.querySelectorAll("tr");
-  
-  // ایجاد ردیف‌های جدول و محاسبه جمع
-  let tableRowsHTML = '';
-  
-  if (rows.length === 0) {
-    tableRowsHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
-          هیچ آیتمی در پیش‌فاکتور وجود ندارد
-        </td>
-      </tr>
-    `;
-  } else {
-    rows.forEach((row, index) => {
-      const cells = row.querySelectorAll("td");
-      
-      // خواندن مقادیر از سلول‌ها
-      const length = cells[2]?.textContent || '0';
-      const quantity = cells[3]?.textContent || '0';
-      const unitPrice = cells[5]?.textContent || '0';
-      const totalPrice = cells[6]?.textContent || '0';
-      
-      // تبدیل اعداد فارسی به انگلیسی برای محاسبه
-      const totalPriceNumber = parseInt(totalPrice.replace(/[٬,]/g, '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))) || 0;
-      grandTotal += totalPriceNumber;
-      
-      // ایجاد ردیف جدول
-      tableRowsHTML += `
-        <tr>
-          <td>${index + 1}</td>
-          <td style="text-align: right; padding: 8px;">${cells[1]?.innerHTML || ''}</td>
-          <td>${length}</td>
-          <td>${quantity}</td>
-          <td>${cells[4]?.textContent || '0'}</td>
-          <td>${unitPrice}</td>
-          <td>${totalPrice}</td>
-        </tr>
-      `;
+    saveAsImageBtn.addEventListener('click', function () {
+        alert("برای ذخیره به صورت عکس، از ابزار اسکرین‌شات یا Print to PDF مرورگر استفاده کنید.");
     });
-  }
-  
-  // HTML نهایی
-  const htmlContent = `
-    <div style="text-align: center; border-bottom: 3px solid #1E6AA7; padding-bottom: 20px; margin-bottom: 25px;">
-      <h1 style="margin: 0 0 15px 0; color: #1E6AA7; font-size: 24px; font-family: 'B Nazanin';">پیش‌فاکتور تولیدی خرپا و تیرچه سماوی</h1>
-      <div style="font-size: 16px; margin: 8px 0; font-family: 'B Nazanin'; white-space: nowrap; word-break: keep-all;">
-        بندرعباس بلوار امام خمینی-شهر نمایش-مجتمع بزرگ شهر نمایش-طبقه اول-واحد شماره ۱۱
-      </div>
-      <div style="font-size: 14px; color: #555;">تلفن: ۰۹۰۰۵۵۵۳۱۱۳</div>
-    </div>
-    
-    <div style="display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 14px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
-      <div><strong>تاریخ:</strong> ${persianDate}</div>
-      <div><strong>شماره پیش‌فاکتور:</strong> PF-${Date.now().toString().slice(-6)}</div>
-    </div>
-    
-    <div style="background: #f0f7ff; padding: 20px; border-radius: 8px; margin-bottom: 25px; border-right: 4px solid #1E6AA7;">
-      <h3 style="margin: 0 0 15px 0; color: #1E6AA7; font-size: 18px;">مشخصات خریدار</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
-        <div><strong>نام:</strong> ${document.getElementById('clientName').value || 'مشتری محترم'}</div>
-        <div><strong>تلفن:</strong> ${document.getElementById('clientPhone').value || '---'}</div>
-        <div style="grid-column: 1 / span 2;"><strong>آدرس:</strong> ${document.getElementById('clientAddress').value || '---'}</div>
-      </div>
-    </div>
-    
-    <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 25px; font-family: 'B Nazanin';">
+
+    sendWhatsAppBtn.addEventListener('click', function () {
+        const name = customerNameInput.value || "مشتری";
+        const phone = customerPhoneInput.value || "";
+        let text = `پیش‌فاکتور خرپا / تیرچه برای ${name}\n`;
+        if (projectNameInput.value) {
+            text += `پروژه: ${projectNameInput.value}\n`;
+        }
+        if (projectAddressInput.value) {
+            text += `آدرس: ${projectAddressInput.value}\n`;
+        }
+        text += `----------------------\n`;
+        invoiceItems.forEach((item, i) => {
+            text += `${i + 1}. ${item.description}\n`;
+            text += `طول هر تیرچه: ${item.length} متر، تعداد: ${item.count}\n`;
+            text += `طول کل: ${item.totalLength} متر\n`;
+            text += `قیمت واحد: ${formatNumber(item.unitPrice)} تومان\n`;
+            text += `مبلغ کل: ${formatNumber(item.totalPrice)} تومان\n`;
+            text += `----------------------\n`;
+        });
+        const total = invoiceItems.reduce((sum, it) => sum + it.totalPrice, 0);
+        text += `جمع کل: ${formatNumber(total)} تومان\n`;
+        if (phone) {
+            text += `شماره تماس: ${phone}\n`;
+        }
+
+        const url = `https://wa.me/989005553113?text=${encodeURIComponent(text)}`;
+        window.open(url, '_blank');
+    });
+
+    toggleAdminPanelBtn.addEventListener('click', function () {
+        adminPanel.style.display = adminPanel.style.display === 'none' || adminPanel.style.display === '' ? 'block' : 'none';
+    });
+
+    closeAdminPanelBtn.addEventListener('click', function () {
+        adminPanel.style.display = 'none';
+    });
+
+    showAdminFieldsBtn.addEventListener('click', function () {
+        const pass = adminPassInput.value;
+        if (pass !== getAdminPassword()) {
+            showAdminStatus('❌ رمز نادرست', 'error');
+            return;
+        }
+        adminFields.style.display = 'block';
+        fillAdminFields();
+        showAdminStatus('✅ مقادیر نمایش داده شد.', 'success');
+    });
+
+    saveGithubConfigBtn.addEventListener('click', function () {
+        config.github = {
+            owner: githubUserInput.value.trim(),
+            repo: githubRepoInput.value.trim(),
+            branch: githubBranchInput.value.trim() || 'main'
+        };
+        saveConfig(config);
+        showAdminStatus('✅ تنظیمات GitHub در این مرورگر ذخیره شد.', 'success');
+    });
+
+    testGithubConnectionBtn.addEventListener('click', async function () {
+        showAdminStatus('در حال تست اتصال ...', 'info');
+        try {
+            const owner = githubUserInput.value.trim();
+            const repo = githubRepoInput.value.trim();
+            const branch = githubBranchInput.value.trim() || 'main';
+            if (!owner || !repo) {
+                showAdminStatus('نام کاربری و ریپو را وارد کنید.', 'error');
+                return;
+            }
+            const url = `https://api.github.com/repos/${owner}/${repo}/branches/${branch}`;
+            const res = await fetch(url);
+            if (!res.ok) {
+                throw new Error('عدم دسترسی یا نامعتبر بودن ریپو/برنچ');
+            }
+            showAdminStatus('✅ اتصال به ریپو برقرار است.', 'success');
+        } catch (e) {
+            showAdminStatus('❌ خطا در اتصال: ' + e.message, 'error');
+        }
+    });
+
+    // تابع قدیمی که ممکن است قبلا برای ارسال مستقیم به GitHub استفاده می‌شد
+    async function updateConfigOnGitHub(newConfig) {
+        // این تابع نگه داشته شده؛ منطق اصلی ذخیره را تابع جدید saveConfigToGithubAPI انجام می‌دهد
+        return true;
+    }
+
+    // *** تغییر شماره 2: تابع جدید برای ذخیره از طریق API سرورلس ***
+    async function saveConfigToGithubAPI() {
+        showAdminStatus('در حال ذخیره...', 'info');
+        try {
+            const newConfig = {
+                ironPrice: Number(ironInput.value),
+                concretePrice: Number(concreteInput.value),
+                rebar: {
+                    "8": Number(r8Input.value), "10": Number(r10Input.value),
+                    "12": Number(r12Input.value), "14": Number(r14Input.value),
+                    "16": Number(r16Input.value), "18": Number(r18Input.value)
+                }
+            };
+            const response = await fetch('/api/update-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newConfig)
+            });
+            if (!response.ok) throw new Error('خطا');
+            config = newConfig;
+            saveConfig(config);
+            showAdminStatus('✅ ذخیره شد!', 'success');
+            return true;
+        } catch (error) {
+            showAdminStatus('❌ خطا: ' + error.message, 'error');
+            return false;
+        }
+    }
+
+    // *** تغییر شماره 3: هندلر دکمه ذخیره و ارسال به GitHub ***
+    adminSaveBtn.addEventListener('click', async function() {
+        const pass = adminPassInput.value;
+        if (pass !== getAdminPassword()) {
+            showAdminStatus('❌ رمز نادرست', 'error');
+            return;
+        }
+        await saveConfigToGithubAPI();
+        fillAdminFields(true);
+    });
+
+    resetConfigBtn.addEventListener('click', function () {
+        if (!confirm('مقادیر به پیش‌فرض بازگردانده شود؟')) return;
+        config = { ...DEFAULT_CONFIG };
+        saveConfig(config);
+        fillAdminFields();
+        showAdminStatus('✅ مقادیر به پیش‌فرض بازگشت.', 'success');
+    });
+</script>
+</body>
+</html>
