@@ -545,20 +545,24 @@
     let config = loadConfig();
 
     // *** تغییر شماره 1: لود از config.json ریپو بعد از تعریف config ***
-    async function loadConfigFromRepo() {
-        try {
-            const response = await fetch('/config.json?v=' + Date.now());
-            if (!response.ok) throw new Error('Failed');
-            const data = await response.json();
-            config.ironPrice = data.ironPrice || config.ironPrice;
-            config.concretePrice = data.concretePrice || config.concretePrice;
-            if (data.rebar) config.rebar = { ...config.rebar, ...data.rebar };
-            fillAdminFields(true);
-            return true;
-        } catch (error) {
-            return false;
-        }
+   // *** لود خودکار قیمت‌ها از config.json ریپو ***
+async function loadConfigFromRepo() {
+    try {
+        const response = await fetch('/config.json?v=' + Date.now());
+        if (!response.ok) throw new Error('Failed');
+        const data = await response.json();
+        config.ironPrice = data.ironPrice || config.ironPrice;
+        config.concretePrice = data.concretePrice || config.concretePrice;
+        if (data.rebar) config.rebar = { ...config.rebar, ...data.rebar };
+        saveConfig(config);
+        fillAdminFields(true);
+        console.log('✅ قیمت‌ها لود شد');
+        return true;
+    } catch (error) {
+        console.log('⚠️ خطا:', error.message);
+        return false;
     }
+}
 
     document.addEventListener('DOMContentLoaded', async () => {
         await loadConfigFromRepo();
